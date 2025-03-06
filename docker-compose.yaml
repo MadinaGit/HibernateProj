@@ -1,0 +1,41 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: "no"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql_secret
+      MYSQL_USER: mysql_user
+      MYSQL_PASSWORD: mysql_secret
+      MYSQL_DATABASE: mydb
+    healthcheck:
+      test: mysqladmin ping -u root -p $$MYSQL_ROOT_PASSWORD
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+  phpmyadmin:
+    image: phpmyadmin:5.2.2
+    restart: "no"
+    ports:
+      - "8282:80"
+    volumes:
+      - phpmyadmin_data:/sessions
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: mysql_user
+      PMA_PASSWORD: mysql_secret
+    healthcheck:
+      test: curl --fail -s http://localhost/robots.txt || exit -1
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+volumes:
+  mysql_data:
+  phpmyadmin_data:
